@@ -1,0 +1,31 @@
+#playbook in yaml
+#
+
+---
+- name: provision a basic server
+  hosts: webserver
+  become: yes
+
+  tasks:
+
+    - name: Install nginx web server
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: create new user
+      user:
+        name: devops
+        shell: /bin/bash
+        group: sudo
+        state: present
+        create_home: yes
+
+    - name: create application permissions
+      file:
+        path: /opt/app
+        state: directory
+        owner: devops
+        group: devops
+        mode: '0755'
