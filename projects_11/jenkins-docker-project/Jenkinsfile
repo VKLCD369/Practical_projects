@@ -3,36 +3,35 @@ pipeline {
 
     stages {
 
-        stages('Checkout code') {
+        stage('Checkout') {
             steps {
-                git 'https://github.com/VKLCD369/Practical_projects.git'
+                Checkout scm
             }
         }
 
-        stages('Build Docker Image') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("myapp:test")
+                    docker.build("myapp-test")
                 }
             }
         }
 
-        stages('Run Test in Container') {
+        stage('Run Tests') {
             steps {
                 script {
-                    docker.image("myapp:test").inside {
-                        sh 'pytest'
+                    docker.image("myapp-test").inside {
+                        sh "pytest"
                     }
                 }
             }
         }
 
-        stages('Deploy to Test Environment') {
+        stage('Deploy (Test Environment)') {
             steps {
                 sh '''
-                echo "Deploying to test environment..."
-                mkdir -p /tmp/test-deploy
-                cp app.py /tmp/test-deploy/
+                docker rm -f myapp || true
+                docker run -d --name myapp myapp-test
                 '''
             }
         }
