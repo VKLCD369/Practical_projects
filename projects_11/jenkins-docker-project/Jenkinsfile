@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stages('Checkout code') {
+            steps {
+                git 'https://github.com/VKLCD369/Practical_projects.git'
+            }
+        }
+
+        stages('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("myapp:test")
+                }
+            }
+        }
+
+        stages('Run Test in Container') {
+            steps {
+                script {
+                    docker.image("myapp:test").inside {
+                        sh 'pytest'
+                    }
+                }
+            }
+        }
+
+        stages('Deploy to Test Environment') {
+            steps {
+                sh '''
+                echo "Deploying to test environment..."
+                mkdir -p /tmp/test-deploy
+                cp app.py /tmp/test-deploy/
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'pipeline executed successfully'
+        }
+        failure {
+            echo 'pipeline failed'
+        }
+    }
+}
